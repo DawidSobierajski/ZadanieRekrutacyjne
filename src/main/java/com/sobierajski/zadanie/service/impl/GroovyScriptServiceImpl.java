@@ -6,18 +6,13 @@ import com.sobierajski.zadanie.data.repository.GroovyScriptRepository;
 import com.sobierajski.zadanie.service.GroovyScriptService;
 import com.sobierajski.zadanie.utils.exception.ElementExistsException;
 import com.sobierajski.zadanie.utils.exception.ElementNotFoundException;
-import com.sobierajski.zadanie.utils.exception.RunScriptException;
 import com.sobierajski.zadanie.utils.mapper.Mapper;
+import groovy.lang.GroovyShell;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -31,12 +26,6 @@ public class GroovyScriptServiceImpl implements GroovyScriptService {
     private final GroovyScriptRepository groovyScriptRepository;
     @NonNull
     private final Mapper mapper;
-
-    private static final ScriptEngine engine;
-
-    static{
-        engine = new ScriptEngineManager(null).getEngineByName("groovy");
-    }
 
     @Override
     public List<GroovyScriptDto> getGroovyScripts() {
@@ -88,23 +77,17 @@ public class GroovyScriptServiceImpl implements GroovyScriptService {
 
     @Override
     @Transactional
-    public Object runGroovyScript(@NonNull String scriptName) throws ElementNotFoundException, RunScriptException {
+    public Object runGroovyScript(@NonNull String scriptName) throws ElementNotFoundException {
         Optional<GroovyScript> gs = groovyScriptRepository.findById(scriptName);
-        Object result;
+        String result;
 
-        if(gs.isPresent()){
+        if (gs.isPresent()) {
             GroovyScriptDto groovyScript = mapper.map(gs.get());
+            GroovyShell groovyShell = new GroovyShell();
 
-            ScriptEngineManager engineManager = new ScriptEngineManager(null);
-            ScriptEngine engine = engineManager.getEngineByName("groovy");
+            result = "" + groovyShell.evaluate(groovyScript.getScript());
 
-            try {
-                result = engine.eval(groovyScript.getScript());
-            } catch (ScriptException e) {
-                throw new RunScriptException(scriptName,e);
-            }
-
-            return result;
+            return result.isEmpty() ? "Nothing to return" : result;
         } else throw new ElementNotFoundException(scriptName);
     }
 }
