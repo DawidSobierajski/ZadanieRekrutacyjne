@@ -22,6 +22,12 @@ public class StandardExceptionHandler {
         return ResponseEntity.badRequest().build();
     }
 
+    @ExceptionHandler(RunScriptException.class)
+    public ResponseEntity handle(RunScriptException e){
+        log.error(e.getMessage(),e);
+        return new ResponseEntity(INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity handle(Exception e) {
         log.error(e.getLocalizedMessage(), e);

@@ -2,8 +2,10 @@ package com.sobierajski.zadanie.utils.mapper;
 
 import com.sobierajski.zadanie.data.dto.GroovyScriptDto;
 import com.sobierajski.zadanie.data.entity.GroovyScript;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class Mapper {
     public String map(byte[] array) {
