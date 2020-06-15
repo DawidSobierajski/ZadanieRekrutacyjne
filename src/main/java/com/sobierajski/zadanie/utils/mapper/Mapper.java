@@ -21,6 +21,7 @@ public class Mapper {
         return GroovyScriptDto.builder()
                 .name(script.getName())
                 .script(map(script.getScript()))
+                .possibleMethodsToCall(script.getPossibleMethodsToCall())
                 .build();
     }
 
@@ -28,6 +29,7 @@ public class Mapper {
         return GroovyScript.builder()
                 .name(groovyScriptDto.getName())
                 .script(map(groovyScriptDto.getScript()))
+                .possibleMethodsToCall(groovyScriptDto.getPossibleMethodsToCall())
                 .build();
     }
 }

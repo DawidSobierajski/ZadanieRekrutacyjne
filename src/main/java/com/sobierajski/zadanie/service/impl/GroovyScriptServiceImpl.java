@@ -6,6 +6,7 @@ import com.sobierajski.zadanie.data.repository.GroovyScriptRepository;
 import com.sobierajski.zadanie.service.GroovyScriptService;
 import com.sobierajski.zadanie.utils.exception.ElementExistsException;
 import com.sobierajski.zadanie.utils.exception.ElementNotFoundException;
+import com.sobierajski.zadanie.utils.exception.RunScriptException;
 import com.sobierajski.zadanie.utils.mapper.Mapper;
 import groovy.lang.GroovyShell;
 import lombok.NonNull;
@@ -77,17 +78,36 @@ public class GroovyScriptServiceImpl implements GroovyScriptService {
 
     @Override
     @Transactional
-    public Object runGroovyScript(@NonNull String scriptName) throws ElementNotFoundException {
-        Optional<GroovyScript> gs = groovyScriptRepository.findById(scriptName);
+    public Object runGroovyScript(@NonNull GroovyScriptDto script) throws ElementNotFoundException, RunScriptException {
+        Optional<GroovyScript> gs = groovyScriptRepository.findById(script.getName());
         String result;
 
         if (gs.isPresent()) {
             GroovyScriptDto groovyScript = mapper.map(gs.get());
             GroovyShell groovyShell = new GroovyShell();
 
-            result = "" + groovyShell.evaluate(groovyScript.getScript());
+            if(!groovyScript.getPossibleMethodsToCall().contains(script.getMethodToCall())){
+                throw new RunScriptException(script.getName(),"Script does not contain method: "+script.getMethodToCall());
+            }
+
+            result =String.valueOf(
+                    groovyShell.evaluate(
+                        groovyScript.getScript() + generateMethodCall(script.getMethodToCall(),script.getParams())
+                    )
+            );
 
             return result.isEmpty() ? "Nothing to return" : result;
-        } else throw new ElementNotFoundException(scriptName);
+        } else throw new ElementNotFoundException(script.getName());
+    }
+
+    private String generateMethodCall(String method,String[] params){
+        StringBuilder sb = new StringBuilder("\n"+method).append("(");
+
+        for(int i=0; i<params.length-1;i++){
+            sb.append(params[i]).append(",");
+        }
+        sb.append(params[params.length-1]).append(")");
+
+        return sb.toString();
     }
 }

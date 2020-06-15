@@ -21,5 +21,5 @@ public interface GroovyScriptService {
 
     void deleteGroovyScript(@NonNull String scriptName) throws ElementNotFoundException;
 
-    Object runGroovyScript(@NonNull String scriptName) throws ElementNotFoundException, RunScriptException;
+    Object runGroovyScript(@NonNull GroovyScriptDto script) throws ElementNotFoundException, RunScriptException;
 }

@@ -34,11 +34,31 @@ public class ScriptController {
         return groovyScriptService.getGroovyScript(scriptName);
     }
 
+    /*
+    *   POST REQUESTBODY EXAMPLE:
+    *   {
+    *        "name": "pow",
+    *        "script": "def pow(long a, long n) {...}",
+    *        "possibleMethodsToCall":"pow(a,n)"
+    *   }
+    *
+    * */
+
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public void addScript(@RequestBody @NonNull GroovyScriptDto groovyScriptAddDto) throws ElementExistsException {
         groovyScriptService.addGroovyScript(groovyScriptAddDto);
     }
+
+    /*
+    PUT REQUESTBODY EXAMPLE:
+        {
+            "name":"pow",
+            "possibleMethodsToCall":"procedurka",
+            "script":"def procedurka(n) {...}"
+        }
+
+     */
 
     @PutMapping()
     @ResponseStatus(HttpStatus.ACCEPTED)
@@ -46,16 +66,30 @@ public class ScriptController {
         groovyScriptService.updateGroovyScript(groovyScriptUpdateDto);
     }
 
+    /*
+    DELETE REQUEST PATH EXAMPLE:
+        localhost:8080/script/pow
+     */
     @DeleteMapping("/{scriptName}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteScript(@PathVariable @NonNull String scriptName) throws ElementNotFoundException {
         groovyScriptService.deleteGroovyScript(scriptName);
     }
 
-    @GetMapping("/{scriptName}/run")
+    /*
+    REQUESTBODY TO RUN SCRIPT EXAMPLE:
+        {
+            "name":"pow",
+            "methodToCall":"pow",
+            "params":[
+                "2","2"
+            ]
+        }
+     */
+    @GetMapping("/run")
     @ResponseStatus(HttpStatus.OK)
-    public Object runScript(@PathVariable @NonNull String scriptName) throws ElementNotFoundException, RunScriptException {
-        return groovyScriptService.runGroovyScript(scriptName);
+    public Object runScript(@RequestBody @NonNull GroovyScriptDto script) throws ElementNotFoundException, RunScriptException {
+        return groovyScriptService.runGroovyScript(script);
     }
 }
 
